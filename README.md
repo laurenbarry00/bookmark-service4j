@@ -36,6 +36,14 @@ aws lambda add-permission
 #### To find ARN:
 **API Gateway** -> **APIs** -> **bookmark-service** -> **/bookmark/{title} GET** -> Copy ARN from **Method Request**
 
+### Requests
+**GET:**
+ `/Prod/bookmark/%7Btitle%7D`
+
+**POST:** 
+`/Prod/bookmark`
+
+
 ## Local development
 
 ### Invoking function locally through local API Gateway
