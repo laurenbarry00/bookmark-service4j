@@ -1,0 +1,61 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  bookmark-service
+
+  SAM Template for bookmark-service
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+
+  ApiGatewayApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Cors: "'*'"
+      DefinitionBody:
+          'Fn::Transform':
+            Name: 'AWS::Include'
+            Parameters:
+              Location: s3://bookmark-service-infra4j/bookmark-new.yaml
+
+  GetLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./target/classes
+      Handler: me.laubarr.bookmarkService.BookmarkHandler::handleRequest
+      Runtime: java8
+      Events:
+        GetBookmark:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayApi
+            Path: /bookmark/{title}
+            Method: POST
+
+  PostLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./target/classes
+      Handler: me.laubarr.bookmarkService.SimpleHandler::handleRequest
+      Runtime: java8
+      Events:
+        PostBookmark:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayApi
+            Path: /bookmark
+            Method: POST
+
+Outputs:
+  SimpleFunctionApi:
+    Description: "API Gateway endpoint URL for Prod stage for simple function"
+    Value: !Sub "https://${ApiGatewayApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+  SimpleFunction:
+    Description: "Simple Function ARN"
+    Value: !GetAtt GetLambdaFunction.Arn
+  SimpleFunctionIamRole:
+    Description: "Implicit IAM Role created for a simple function"
+    Value: !GetAtt GetLambdaFunctionRole.Arn

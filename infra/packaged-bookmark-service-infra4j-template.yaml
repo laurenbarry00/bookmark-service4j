@@ -1,0 +1,37 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Template describing the service infrastructure
+Parameters:
+  CodeCommitRepoName:
+    Type: String
+Resources:
+  IamRoles:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://s3.amazonaws.com/bookmark-service-infra4j/eff1507ea5d1476c5666051ba33ff231.template
+  CodeCommitRepo:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://s3.amazonaws.com/bookmark-service-infra4j/7584a2506e42c9c5431dc2c933a3c302.template
+      Parameters:
+        RepoName:
+          Ref: CodeCommitRepoName
+  CodePipeline:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://s3.amazonaws.com/bookmark-service-infra4j/00543140f64b3bdde838b3f0930d3366.template
+      Parameters:
+        ArtifactBucketName:
+          Fn::GetAtt:
+          - IamRoles
+          - Outputs.ArtifactBucketName
+        CodePipelineServiceRoleArn:
+          Fn::GetAtt:
+          - IamRoles
+          - Outputs.CodePipelineServiceRoleArn
+        CodeBuildServiceRoleArn:
+          Fn::GetAtt:
+          - IamRoles
+          - Outputs.CodeBuildServiceRoleArn
+        CodeCommitRepositoryName:
+          Ref: CodeCommitRepoName
+        CodeCommitBranchName: master
